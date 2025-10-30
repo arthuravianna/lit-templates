@@ -1,13 +1,30 @@
 {
-  "extends": "../../tsconfig.base.json",
-  "files": [],
-  "include": [],
-  "references": [
-    {
-      "path": "../policy-counter"
-    },
-    {
-      "path": "./tsconfig.lib.json"
-    }
-  ]
+  "compilerOptions": {
+    "composite": true,
+    "declarationMap": true,
+    "declaration": true,
+    "importHelpers": true,
+    "isolatedModules": true,
+    "lib": ["es2022"],
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "noEmitOnError": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitOverride": true,
+    "noImplicitReturns": true,
+    "noUnusedLocals": true,
+//    "skipLibCheck": true,
+//    "strict": true,
+    "target": "es2022",
+    "resolveJsonModule": true,
+    "sourceMap": true,
+
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "skipLibCheck": false, // Don't skip lib checking initially
+    "strict": true
+  },
+  "include": ["src/**/*.ts", "src/generated/vincent-ability-metadata.json"],
+  "references": [],
+  "exclude": ["src/**/*.spec.ts", "src/**/*.test.ts"]
 }

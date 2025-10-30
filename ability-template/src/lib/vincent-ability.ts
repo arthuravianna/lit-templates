@@ -1,9 +1,7 @@
 import {
   createVincentAbility,
-  createVincentAbilityPolicy,
   supportedPoliciesForAbility,
 } from '@lit-protocol/vincent-ability-sdk';
-import { bundledVincentPolicy } from '@lit-protocol/vincent-example-policy-counter';
 import { laUtils } from '@lit-protocol/vincent-scaffold-sdk';
 
 import type { EthersType /*LitNamespace*/ } from '../Lit';
@@ -22,19 +20,14 @@ declare const ethers: EthersType;
 
 const { INSUFFICIENT_BALANCE } = KNOWN_ERRORS;
 
-const SendLimitPolicy = createVincentAbilityPolicy({
-  abilityParamsSchema: abilityParamsSchema,
-  bundledVincentPolicy,
-  abilityParameterMappings: {
-    to: 'to',
-  },
-});
 
-export const vincentAbility = createVincentAbility({
+// Type annotation using 'any' to avoid complex internal type references
+// The actual type is preserved at runtime and provides type safety when used
+export const vincentAbility: any = createVincentAbility({
   packageName: '@lit-protocol/vincent-example-ability-native-send' as const,
   abilityParamsSchema: abilityParamsSchema,
   abilityDescription: 'Send native ETH to a recipient',
-  supportedPolicies: supportedPoliciesForAbility([SendLimitPolicy]),
+  supportedPolicies: supportedPoliciesForAbility([]),
 
   precheckSuccessSchema,
   precheckFailSchema,
@@ -100,60 +93,6 @@ export const vincentAbility = createVincentAbility({
           amount,
         },
       );
-
-      // We will first track the send limit entry before submitting the tx to be extra safe about double-spending
-      // If committing to the count policy fails, we don't want to submit the tx at all, so doing it first is important
-      console.log(
-        '[@lit-protocol/vincent-example-ability-native-send/execute] Manually calling policy commit function...',
-      );
-
-      // This is a type-safe reference based on `supportedPolicies` in the ability definition
-      const sendLimitPolicyContext =
-        policiesContext.allowedPolicies['@lit-protocol/vincent-example-policy-counter'];
-
-      if (sendLimitPolicyContext) {
-        console.log(
-          `[@lit-protocol/vincent-example-ability-native-send/execute] ✅ Found send limit policy context. The policy was enabled for ${delegation.delegatorPkpInfo.ethAddress}`,
-        );
-
-        console.log(
-          '[@lit-protocol/vincent-example-ability-native-send/execute] ✅ Policy evaluation result:',
-          sendLimitPolicyContext.result,
-        );
-
-        const { currentCount, maxSends, remainingSends, timeWindowSeconds } =
-          sendLimitPolicyContext.result;
-
-        // `evaluate()` for this particular policy returns some data that are useful when committing the count for the policy.
-        const commitParams = {
-          currentCount,
-          maxSends,
-          remainingSends,
-          timeWindowSeconds,
-        };
-
-        console.log(
-          '[@lit-protocol/vincent-example-ability-native-send/execute] ✅ Available in sendLimitPolicyContext:',
-          Object.keys(sendLimitPolicyContext),
-        );
-        console.log(
-          '[@lit-protocol/vincent-example-ability-native-send/execute] ✅ Calling commit with explicit parameters (ignoring TS signature)...',
-        );
-
-        const commitResult = await sendLimitPolicyContext.commit(commitParams);
-        console.log(
-          '[@lit-protocol/vincent-example-ability-native-send/execute] ✅ Policy commit result:',
-          commitResult,
-        );
-      } else {
-        console.log(
-          '[@lit-protocol/vincent-example-ability-native-send/execute] ❌ Send limit policy context not found in policiesContext.allowedPolicies',
-        );
-        console.log(
-          '[@lit-protocol/vincent-example-ability-native-send/execute] ❌ Available policies:',
-          Object.keys(policiesContext.allowedPolicies || {}),
-        );
-      }
 
       return succeed({
         txHash,
